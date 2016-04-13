@@ -5,13 +5,19 @@ output: html_document
 ---
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-suppressPackageStartupMessages(library(ggplot2))
+# For data manipulation and visualization
 suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(knitr))
+# For US county and state maps
 suppressPackageStartupMessages(library(maps))
+# For loading in shapefiles
 suppressPackageStartupMessages(library(rgdal))
 suppressPackageStartupMessages(library(maptools))
+# For interactive maps
+suppressPackageStartupMessages(library(leaflet))
 ```
-
 
 ## Admistrative:
 
@@ -22,44 +28,55 @@ Please indicate
 * What gave you the most trouble:
 * Any comments you have: 
 
-```{r, cache=TRUE, echo=FALSE}
-# State and county map of US in 2010
-US_state <- map_data("state") %>% 
-  tbl_df()
-US_county <- map_data("county") %>% 
-  tbl_df()
-```
 
 
 
 
 ## Question 1:
 
+```{r, cache=TRUE, echo=FALSE}
+# Load state and county map of US in 2010 from the maps package and convert them
+# to data frames so that we can ggplot them.
+US_state <- map_data("state") %>% 
+  tbl_df()
+US_county <- map_data("county") %>% 
+  tbl_df()
+```
+
+### Choropleth Map of US Voter Behavior in 2000
+
 Download the results of the 2000 election from the [School of Public Affairs at 
 American University in DC](http://www.american.edu/spa/ccps/Data-Sets.cfm) and 
-create a map involving only the lower 48 states that show the proportion of
-people who voted for Bush at a **county** level where
+create a map involving only the lower 48 states that show voter behavior at a 
+**county** level. To keep things simple let's only consider George W. Bush, Al
+Gore, and Ralph Nader. Your write-up must include:
 
-* Counties are filled with red when they tend to favor Bush
-* Counties are filled with blue when they tend to not favor Bush
-* Counties are white with purple when they tend to be split
+1. A [choropleth map](https://en.wikipedia.org/wiki/Choropleth_map) where
+    * Counties are filled with red when they tend to favor Bush
+    * Counties are filled with white when they tend to be split
+    * Counties are filled with blue when they tend to favor Gore and Nader
+2. An answer to the following question: which states exhibit the greatest
+**within state heterogeneity** in voting? Come up with a mathematical
+justification.
 
-Which states exhibit the greatest **within state heterogeneity** in voting? 
-Come up with a mathematical justification.
 
-Notes:
+### Hints
 
-* Hint: `scale_fill_gradient2(name="", low="blue", high="red", mid="white")` for
-the appropriate "mid" point.  See the ggplot2 webpage for this command for
-inspiration.
+* Consider `scale_fill_gradient2(name="", low="blue", high="red", mid="white")` 
+for the appropriate "mid" point.  See the ggplot2 webpage for [this
+command](http://docs.ggplot2.org/0.9.3.1/scale_gradient2.html) for inspiration.
 * I believe the county map is from 2010, whereas the election data is from 2000,
-as such certain census tracts will not match up. The number is not that large.
-* [Counties in Virginia](http://en.wikipedia.org/wiki/List_of_counties_in_Virginia)
-* The following code should help
+as such certain counties will not match up. The number is not that large.
+* [Counties in
+Virginia](http://en.wikipedia.org/wiki/List_of_counties_in_Virginia)
+
+
+### Code Hints
+
+This function eliminates all non-alphanumeric characters and spaces and converts
+all text to lower case:
 
 ```{r}
-# This function eliminates all non-alphanumeric characters and spaces and 
-# converts all text to lower case.
 clean_text <- function(text){
   text <- gsub("[^[:alnum:]]", "", text)
   text <- gsub(" ", "", text)
@@ -67,32 +84,71 @@ clean_text <- function(text){
   return(text)
 }
 clean_text("HeLLO wOrLd.")
+```
 
-ggplot(data=NULL, aes(x=long, y=lat, group=group)) +
-  geom_polygon(data=US_county, fill="white") +
-  geom_path(data=US_county, col="black", size=0.01) +
-  geom_path(data=US_state, col="black", size=0.05) +
+For the following `ggplot`, see how I didn't define `data` nor any `aes`thetics
+in the base `ggplot`, but only within the respective `geom`'s. This is a nice
+trick that allows you to have different `data` and different `aes` apply to
+different `geom`'s; in this case state-level vs county-level data.
+
+```{r}
+ggplot(data=NULL) +
+  geom_polygon(data=US_county, aes(x=long, y=lat, group=group, fill=1)) +
+  geom_path(data=US_county, aes(x=long, y=lat, group=group), col="black", size=0.05) +
+  geom_path(data=US_state, aes(x=long, y=lat, group=group), col="black", size=0.1) +
   coord_map()
 ```
+
+
+### Write-Up
+
+```{r, fig.width=12, fig.height=6}
+
+```
+
+
 
 
 
 
 ## Question 2:
 
-Make an interactive Shiny app and using
+In this question, you must make an interactive "Single File" Shiny app that uses
+Leaflet. For all 184 census tracts in VT in the 2010 census, we present
+information on the proportion of the population that is either
 
-* [Social Explorer](http://www.socialexplorer.com/) to get census data. If you
-are stuck with this, please speak to me. The idea is to do this once.
-* 
+* White
+* African-American
+* Hispanic
+* Asian and Pacific Island
+* Other
 
-Type `getwd()` in the R console to get the directory path to your `HW-4` folder
-and replace `directory_name` with the resulting 
+Use [Social Explorer](http://www.socialexplorer.com/) to get census data. I did
+a demo of this in class. If you don't remember how or are stuck, please speak to
+me or get help from your peers. Do not submit copies of the same file.
+
+
+### Loading Shapefile Data
+
+Here is some starter code:
 
 ```{r}
-directory_name <- "/Users/aykim/Documents/Teaching/MATH216/HW/HW-4"
-shapefile_name <- 
-  paste(directory_name, "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
+shapefile_name <- paste(getwd(), "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
 VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
+leaflet(VT) %>%
+  addTiles() %>% 
+  addPolylines(color="black", weight=1)
 ```
+
+
+### Write-Up
+
+Upload your shiny app to the Middlebury Shiny Server (see Lecture 16) and post
+the url to the app [here](https://www.nhl.com/), replacing the nhl.com link with 
+the link to your app.
+
+Comment on general ethnic demographic trends other that's more substantive than
+"Vermont is really white."
+
+
 

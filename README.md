@@ -10,6 +10,8 @@ from HW-0 on how to
 This homework will cover the following topics:
 
 * Shapefiles and GIS
+* Obtaining census data from [Social Explorer](http://www.socialexplorer.com/).
+Must be on campus or logged into VPN.
 * Interactive maps via the Leaflet package
 * Shiny interactive apps
 
