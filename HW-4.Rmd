@@ -22,6 +22,13 @@ Please indicate
 * What gave you the most trouble:
 * Any comments you have: 
 
+```{r, cache=TRUE, echo=FALSE}
+# State and county map of US in 2010
+US_state <- map_data("state") %>% 
+  tbl_df()
+US_county <- map_data("county") %>% 
+  tbl_df()
+```
 
 
 
@@ -61,11 +68,6 @@ clean_text <- function(text){
 }
 clean_text("HeLLO wOrLd.")
 
-# State and county map of US in 2010
-US_state <- map_data("state") %>% 
-  tbl_df()
-US_county <- map_data("county") %>% 
-  tbl_df()
 ggplot(data=NULL, aes(x=long, y=lat, group=group)) +
   geom_polygon(data=US_county, fill="white") +
   geom_path(data=US_county, col="black", size=0.01) +
@@ -84,11 +86,13 @@ Make an interactive Shiny app and using
 are stuck with this, please speak to me. The idea is to do this once.
 * 
 
-Type `getwd()` in the R console
+Type `getwd()` in the R console to get the directory path to your `HW-4` folder
+and replace `directory_name` with the resulting 
 
 ```{r}
 directory_name <- "/Users/aykim/Documents/Teaching/MATH216/HW/HW-4"
-shapefile_name <- paste(directory_name, "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
+shapefile_name <- 
+  paste(directory_name, "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
 VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
 ```
 
