@@ -114,18 +114,21 @@ ggplot(data=NULL) +
 ## Question 2:
 
 In this question, you must make an interactive "Single File" Shiny app that uses
-Leaflet. For all 184 census tracts in VT in the 2010 census, we present
+Leaflet. For all 184 census tracts in VT in the 2010 census, present
 information on the proportion of the population that is either
 
 * White
 * African-American
 * Hispanic
 * Asian and Pacific Island
-* Other
+* Other, including those of two or more races
 
 Use [Social Explorer](http://www.socialexplorer.com/) to get census data. I did
 a demo of this in class. If you don't remember how or are stuck, please speak to
 me or get help from your peers. Do not submit copies of the same file.
+
+There should be some mechanism in your Shiny app that allows one the user to toggle
+between the different ethnic groups.
 
 
 ### Loading Shapefile Data
@@ -147,7 +150,7 @@ Upload your shiny app to the Middlebury Shiny Server (see Lecture 16) and post
 the url to the app [here](https://www.nhl.com/), replacing the nhl.com link with 
 the link to your app.
 
-Comment on general ethnic demographic trends other that's more substantive than
+Comment on general ethnic demographic trends that's more substantive than just
 "Vermont is really white."
 
 

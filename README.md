@@ -19,6 +19,10 @@ Must be on campus or logged into VPN.
 
 ## Notes
 
+* You must submit onto GitHub:
+    + `HW-4.Rmd` which includes a working link to your Shiny app on the
+    Middlebury Shiny Server.
+    + `App.R` the "single-file" Shiny app code.
 * Due Wednesday 4/27
 * You must either submit
     + A pre-grading feedback request on Wednesday 4/20 OR
