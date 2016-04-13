@@ -1,0 +1,95 @@
+---
+title: "MATH 216 Homework 4"
+author: "WRITE YOUR NAME HERE"
+output: html_document
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(maps))
+suppressPackageStartupMessages(library(rgdal))
+suppressPackageStartupMessages(library(maptools))
+```
+
+
+## Admistrative:
+
+Please indicate
+
+* Who you collaborated with:
+* Roughly how much time you spent on this HW:
+* What gave you the most trouble:
+* Any comments you have: 
+
+
+
+
+
+## Question 1:
+
+Download the results of the 2000 election from the [School of Public Affairs at 
+American University in DC](http://www.american.edu/spa/ccps/Data-Sets.cfm) and 
+create a map involving only the lower 48 states that show the proportion of
+people who voted for Bush at a **county** level where
+
+* Counties are filled with red when they tend to favor Bush
+* Counties are filled with blue when they tend to not favor Bush
+* Counties are white with purple when they tend to be split
+
+Which states exhibit the greatest **within state heterogeneity** in voting? 
+Come up with a mathematical justification.
+
+Notes:
+
+* Hint: `scale_fill_gradient2(name="", low="blue", high="red", mid="white")` for
+the appropriate "mid" point.  See the ggplot2 webpage for this command for
+inspiration.
+* I believe the county map is from 2010, whereas the election data is from 2000,
+as such certain census tracts will not match up. The number is not that large.
+* [Counties in Virginia](http://en.wikipedia.org/wiki/List_of_counties_in_Virginia)
+* The following code should help
+
+```{r}
+# This function eliminates all non-alphanumeric characters and spaces and 
+# converts all text to lower case.
+clean_text <- function(text){
+  text <- gsub("[^[:alnum:]]", "", text)
+  text <- gsub(" ", "", text)
+  text <- tolower(text)
+  return(text)
+}
+clean_text("HeLLO wOrLd.")
+
+# State and county map of US in 2010
+US_state <- map_data("state") %>% 
+  tbl_df()
+US_county <- map_data("county") %>% 
+  tbl_df()
+ggplot(data=NULL, aes(x=long, y=lat, group=group)) +
+  geom_polygon(data=US_county, fill="white") +
+  geom_path(data=US_county, col="black", size=0.01) +
+  geom_path(data=US_state, col="black", size=0.05) +
+  coord_map()
+```
+
+
+
+
+## Question 2:
+
+Make an interactive Shiny app and using
+
+* [Social Explorer](http://www.socialexplorer.com/) to get census data. If you
+are stuck with this, please speak to me. The idea is to do this once.
+* 
+
+Type `getwd()` in the R console
+
+```{r}
+directory_name <- "/Users/aykim/Documents/Teaching/MATH216/HW/HW-4"
+shapefile_name <- paste(directory_name, "/tl_2015_50_tract/tl_2015_50_tract.shp", sep="")
+VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
+
+```
+
