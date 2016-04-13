@@ -88,8 +88,7 @@ Type `getwd()` in the R console
 
 ```{r}
 directory_name <- "/Users/aykim/Documents/Teaching/MATH216/HW/HW-4"
-shapefile_name <- paste(directory_name, "/tl_2015_50_tract/tl_2015_50_tract.shp", sep="")
+shapefile_name <- paste(directory_name, "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
 VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
-
 ```
 
