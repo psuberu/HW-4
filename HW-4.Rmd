@@ -1,6 +1,6 @@
 ---
 title: "MATH 216 Homework 4"
-author: "WRITE YOUR NAME HERE"
+author: "Paul Suberu"
 output: html_document
 ---
 
@@ -23,10 +23,10 @@ suppressPackageStartupMessages(library(leaflet))
 
 Please indicate
 
-* Who you collaborated with:
-* Roughly how much time you spent on this HW:
-* What gave you the most trouble:
-* Any comments you have: 
+* Who you collaborated with: Christian Lehner, Kyler, Allie's code
+* Roughly how much time you spent on this HW:8
+* What gave you the most trouble:Number 2 particularly the files, and I also didnt understand Moran's I.
+* Any comments you have: Will continue working on number 2 for next Wednesday. It won't knit, and my map was pitch black on Viewer, so I didn't include it.
 
 
 
@@ -84,6 +84,7 @@ clean_text <- function(text){
   return(text)
 }
 clean_text("HeLLO wOrLd.")
+
 ```
 
 For the following `ggplot`, see how I didn't define `data` nor any `aes`thetics
@@ -97,15 +98,44 @@ ggplot(data=NULL) +
   geom_path(data=US_county, aes(x=long, y=lat, group=group), col="black", size=0.05) +
   geom_path(data=US_state, aes(x=long, y=lat, group=group), col="black", size=0.1) +
   coord_map()
+
 ```
 
 
 ### Write-Up
 
-```{r, fig.width=12, fig.height=6}
 
+```{r, fig.width=12, fig.height=6}
+electioncounty <- read.csv("COUNTY.csv", header = T) %>% 
+tbl_df()
+electioncounty$STATE <- clean_text(electioncounty$STATE)
+electioncounty$COUNTY <- clean_text(electioncounty$COUNTY)
+US_county$region <- clean_text(US_county$region)
+US_county$subregion <- clean_text(US_county$subregion)
+county_data <- left_join(US_county, electioncounty, by = c("region" = "STATE", "subregion" = "COUNTY" ) )
+
+county_data$PBUSH <- as.numeric(as.character(county_data$PBUSH))
+county_data$PGORE <- as.numeric(as.character(county_data$PGORE))
+county_data$PNADER <- as.numeric(as.character(county_data$PNADER))
+party <- ifelse(county_data$PBUSH >= 0.5, 1, 
+ifelse(county_data$PGORE + county_data$PNADER >= 0.5, -1, 0))
+county_data <- mutate(county_data, party)
+
+ggplot(data=NULL) +
+geom_polygon(data=county_data, aes(x=long, y=lat, group=group, fill=party)) +
+geom_path(data=county_data, aes(x=long, y=lat, group=group), col="black", size=0.05) +
+geom_path(data=US_state, aes(x=long, y=lat, group=group), col="black", size=0.1) +
+coord_map() +
+scale_fill_gradient2(name="", low="blue", high="red", mid="white")
+num_counties <- US_county %>% distinct(subregion) %>% 
+group_by(region) %>% tally() %>% rename(count = n)
+election_score_state <- aggregate(county_data$party, by=list(region=county_data$region), FUN=sum, na.rm = TRUE)
+election_score_state <- election_score_state %>% mutate(prop = x/num_counties$count) 
+election_score_state$prop <- abs(election_score_state$prop)
+election_score_state <- election_score_state %>% arrange(prop)
 ```
 
+This maps shows is the distribution of voting in the 2000 presidential election. Bluer counties prefered the Democrtatic candidates while the red counties preferred Bush. I didn't understand the Moran's I part.
 
 
 
@@ -139,8 +169,9 @@ Here is some starter code:
 shapefile_name <- paste(getwd(), "/VT_census_tracts/tl_2015_50_tract.shp", sep="")
 VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
 leaflet(VT) %>%
-  addTiles() %>% 
+addTiles() %>% 
   addPolylines(color="black", weight=1)
+
 ```
 
 
