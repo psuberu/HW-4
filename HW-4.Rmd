@@ -137,6 +137,14 @@ election_score_state <- election_score_state %>% arrange(prop)
 
 This maps shows is the distribution of voting in the 2000 presidential election. Bluer counties prefered the Democrtatic candidates while the red counties preferred Bush. I didn't understand the Moran's I part.
 
+```{r,  fig.width=12, fig.height=6}
+#Homogeneity <- county_data %>% 
+#distinct(COUNTY) %>% group_by(STATE) %>% 
+#summarise(SD = sd(PBUSH, na.rm = TRUE)) %>% 
+#arrange(-SD)
+#knitr::kable(head(Homogeneity, 5), caption = "Most Heterogeneous States")
+
+```
 
 
 
@@ -170,12 +178,78 @@ shapefile_name <- paste(getwd(), "/VT_census_tracts/tl_2015_50_tract.shp", sep="
 VT <- readOGR(shapefile_name, layer = "tl_2015_50_tract", verbose = FALSE)
 leaflet(VT) %>%
 addTiles() %>% 
-  addPolylines(color="black", weight=1)
+addPolylines(color="black", weight=1)
 
+VTdata <- read.csv("R11168779_SL140.csv", header=TRUE) %>% tbl_df() 
+VTdata1 <- VTdata %>% 
+select(Geo_FIPS, Geo_NAME, Geo_COUNTY, Geo_TRACT,Geo_QName, SE_T054_001, SE_T054_003, SE_T054_004, 
+SE_T054_005, SE_T054_006, SE_T054_007, SE_T054_008, SE_T055_001, SE_T055_002) %>% 
+rename(Total_pop = SE_T054_001, 
+Black = SE_T054_003,
+Hispanic = SE_T054_004,
+American_Indian = SE_T054_005,
+Asian = SE_T054_006,
+Hawaiian_Islander = SE_T054_007,
+Other = SE_T054_008,
+Two_or_more = SE_T055_001,
+White = SE_T055_002) %>% 
+mutate(Other_incl = American_Indian + Hawaiian_Islander + Other + Two_or_more) %>% 
+select(-American_Indian, -Hawaiian_Islander, -Other, -Two_or_more)
+
+VTdata2 <- VTdata1 %>% 
+mutate(
+prop_white = White/Total_pop, 
+prop_black = Black/Total_pop, 
+prop_asian = Asian/Total_pop,
+prop_hisp = Hispanic/Total_pop,
+prop_other = Other_incl/Total_pop)
+
+pal_white<- colorNumeric(palette = "Greens", domain = VTdata2$prop_white)
+pal_hisp<-  colorNumeric(palette = "OrRd", domain = VTdata2$prop_hisp)
+pal_black<- colorNumeric(palette = "Blues", domain = VTdata2$prop_black)
+pal_asian<- colorNumeric(palette = "Purples", domain = VTdata2$prop_asian)
+
+white <- leaflet(VT) %>%
+addTiles() %>% 
+addPolylines(color="black", weight=1) %>% 
+addPolygons(stroke = FALSE, fillOpacity = 0.5, 
+color = ~pal_white(VTdata2$prop_white)) %>% 
+addLegend("bottomright", pal = pal_white, values = ~VTdata2$prop_white, 
+title = "Proportion White")
+white
+
+hisp <- leaflet(VT) %>%
+addTiles() %>% 
+addPolylines(color="black", weight=1) %>% 
+addPolygons(stroke = FALSE, fillOpacity = 0.5, 
+color = ~pal_hisp(VTdata2$prop_hisp)) %>% 
+addLegend("bottomright", pal = pal_hisp, values = ~VTdata2$prop_hisp, 
+title = "Proportion Hispanic")
+hisp
+ 
+black <- leaflet(VT) %>%
+addTiles() %>% 
+addPolylines(color="black", weight=1) %>% 
+addPolygons(stroke = FALSE, fillOpacity = 0.5, 
+color = ~pal_black(VTdata2$prop_black)) %>% 
+addLegend("bottomright", pal = pal_black, values = ~VTdata2$prop_black, 
+title = "Proportion Black")
+black
+
+asian <- leaflet(VT) %>%
+addTiles() %>% 
+addPolylines(color="black", weight=1) %>% 
+addPolygons(stroke = FALSE, fillOpacity = 0.5, 
+color = ~pal_asian(VTdata2$prop_asian)) %>% 
+addLegend("bottomright", pal = pal_asian, values = ~VTdata2$prop_asian, 
+title = "Proportion Asian")
+asian
 ```
 
 
 ### Write-Up
+
+While overall vermont is very homogenous in terms of race, there are certain places in the State that has higher populations of minorties and immigrants such as Burlington. 
 
 Upload your shiny app to the Middlebury Shiny Server (see Lecture 16) and post
 the url to the app [here](https://www.nhl.com/), replacing the nhl.com link with 
